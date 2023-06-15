@@ -1,30 +1,28 @@
 ﻿@model Category
 
 
-<form asp-action="Edit">
+<form asp-action="Delete">
     <div class="container">
         <div class="border p-3 mt-4">
             <div classs="row pb-2">
-                <h2 class="p-0">Edit Category</h2>
+                <h2 class="p-0">Delete Category</h2>
                 <hr />
             </div>
             <div asp-validation-summary="ModelOnly"></div>
             <input type="hidden" asp-for="Id" />
             <div class="row mb-3 p-1">
                 <label class="p-0" asp-for="Name"></label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
+                <input asp-for="Name" disabled class="form-control" />
             </div>
 
             <div class="row mb-3 p-1">
                 <label class="p-0" asp-for="DisplayOrder"></label>
-                <input asp-for="DisplayOrder" class="form-control" />
-                <span asp-validation-for="DisplayOrder" class="text-danger"></span>
+                <input asp-for="DisplayOrder" disabled class="form-control" />
             </div>
 
             <div class="row">
                 <div class="col-6">
-                    <button type="submit" class="btn btn-primary form-control">Update</button>
+                    <button type="submit" class="btn btn-danger form-control">Delete</button>
                 </div>
                 <div class="col-6">
                     <a asp-action="Index" asp-controller="Category" class="btn btn-outline-secondary form-control">Back to list</a>
@@ -34,8 +32,4 @@
     </div>
 </form>
 
-@section scripts{
-    @{
-        <partial name="_ValidationScriptsPartial" />
-    }
-}
+
