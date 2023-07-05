@@ -19,4 +19,9 @@
     <PackageReference Include="toastr" Version="2.1.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Bulk.DataAccess\Bulk.DataAccess.csproj" />
+    <ProjectReference Include="..\Bulky.Utility\Bulky.Utility.csproj" />
+  </ItemGroup>
+
 </Project>
