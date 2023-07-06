@@ -7,7 +7,9 @@ a.navbar-brand {
     word-break: break-all;
 }
 
-
+#drop-color{
+    color :white !important;
+}
 
 .nav-pills .nav-link.active, .nav-pills .show > .nav-link {
     color: #fff;
