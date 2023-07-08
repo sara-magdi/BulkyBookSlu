@@ -1,7 +1,9 @@
 ﻿using Bulk.DataAccess.Data;
 using Bulk.DataAccess.Repository.IRepository;
 using Bulky.Models;
+using Bulky.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace BulkyBook.Areas.Admin.Controllers
 {
@@ -16,56 +18,48 @@ namespace BulkyBook.Areas.Admin.Controllers
         public IActionResult Index()
         {
             List<Product> obj = _unitOfWork.Product.GetAll().ToList();
+
             return View(obj);
         }
-        public IActionResult Create()
+        public IActionResult Upsert(int? id)
         {
-            return View();
+         
+            ProductViewModel productViewModel = new()
+            {
+                CategoryList = _unitOfWork.Category.GetAll()
+               .Select(w => new SelectListItem
+               {
+                   Text = w.Name,
+                   Value = w.Id.ToString(),
+               }),
+                Product = new Product()
+            };
+
+            if(id == null || id == 0)
+            {
+                //Create
+                return View(productViewModel);
+            }
+            else
+            {
+                //Update
+                productViewModel.Product = _unitOfWork.Product.Get(w => w.Id == id);
+                return View(productViewModel);
+            }
         }
         [HttpPost]
-        public IActionResult Create(Product product)
+        public IActionResult Upsert(ProductViewModel obj,IFormFile? file)
         {
-            //if (product.Title == product.ListPrice.ToString())
-            //{
-            //    ModelState.AddModelError("Name", "the Display Order Can't Exactly Match The Name");
-            //}
             if (ModelState.IsValid)
             {
-                _unitOfWork.Product.Add(product);
+                _unitOfWork.Product.Add(obj.Product);
                 _unitOfWork.Save();
                 TempData["success"] = "Product Created Successfully";
                 return RedirectToAction("Index");
             }
             return View();
         }
-        [HttpGet]
-        public IActionResult Edit(int? id)
-        {
-            if (id == null || id == 0)
-            {
-                return NotFound();
-            }
-            Product product = _unitOfWork.Product.Get(e => e.Id == id);
-            if (product == null)
-            {
-                return NotFound();
-            }
-            return View(product);
-        }
-        [HttpPost]
-        public IActionResult Edit(Product product)
-        {
-            if (ModelState.IsValid)
-            {
-                _unitOfWork.Product.Update(product);
-                _unitOfWork.Save();
-                TempData["success"] = "Product Edit Successfully";
-
-                return RedirectToAction("Index");
-            }
-            return View(product);
-        }
-
+       
 
         [HttpGet]
         public IActionResult Delete(int? id)
