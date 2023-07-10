@@ -14,7 +14,7 @@
             <div class="col-6">
             </div>
             <div class="col-6 text-end">
-                <a asp-controller="Product" asp-action="Upsert" class="btn btn-primary">
+                <a asp-controller="Product" asp-action="Upsert"  class="btn btn-primary">
                     <i class="bi bi-plus-circle"> Add New Product</i>
                 </a>
             </div>
@@ -31,32 +31,6 @@
             <th></th>
         </tr>
         </thead>
-       @* <tbody>
-            @foreach (var obj in Model)
-            {
-                <tr>
-                    <td>@obj.Title</td>
-                    <td>@obj.ISBN</td>
-                    <td>@obj.ListPrice</td>
-                    <td>@obj.Author</td>
-                    <td>@obj.Category.Name</td>
-
-                    <td>
-                        <div class="w-75 btn-group" role="group">
-                            <a asp-action="Upsert" asp-controller="Product" asp-route-id="@obj.Id"
-                               class="btn btn-primary mx-2">
-                                <i class="bi bi-pencil-square"></i>Edit
-                            </a>
-                            <a asp-action="Delete" asp-controller="Product" asp-route-id="@obj.Id"
-                               class="btn btn-danger mx-2">
-                                <i class="bi bi-trash"></i>Delete
-                            </a>
-                        </div>
-                    </td>
-                </tr>
-            }
-        </tbody>*@
-       
     </table>
 </div>
 
