@@ -1,9 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Bulky.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 namespace Bulk.DataAccess.Data
 {
-    public class AppDbcontext : DbContext
+    public class AppDbcontext : IdentityDbContext<IdentityUser>
     {
         public AppDbcontext(DbContextOptions<AppDbcontext> options) 
             :base(options)
@@ -12,6 +14,7 @@ namespace Bulk.DataAccess.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
             modelBuilder.Entity<Category>(b =>
             {
                 b.HasData(new
@@ -119,5 +122,6 @@ namespace Bulk.DataAccess.Data
         }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Product> Products { get; set; }
+        public DbSet<ApplicationUser> ApplicationUsers { get; set; }
     }
 }
