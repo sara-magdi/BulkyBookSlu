@@ -13,11 +13,13 @@ namespace Bulk.DataAccess.Repository
         private readonly AppDbcontext _db;
         public ICategoryRepository Category { get;private set; }   
         public IProductRepository Product { get;private set; }   
+        public ICompanyRepository Company { get;private set; }   
         public UnitOfWork(AppDbcontext db)
         {
             _db = db;
             Category = new CategoryRepository(_db);    
             Product = new ProductRepository(_db);    
+            Company = new CompanyRepository(_db);
         }
        // public ICategoryRepository CategoryRepository { get;private set; }
 
