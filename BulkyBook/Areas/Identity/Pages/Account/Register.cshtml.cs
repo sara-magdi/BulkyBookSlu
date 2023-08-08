@@ -170,6 +170,11 @@ namespace BulkyBook.Areas.Identity.Pages.Account
                 user.PhoneNumber = Input.PhoneNumber;   
                 user.PostalCode = Input.PostalCode;
                 user.State = Input.State;
+
+                if (Input.Role == SD.Role_Company)
+                {
+                    user.CompanyId = Input.CompanyId;
+                }
                 var result = await _userManager.CreateAsync(user, Input.Password);
 
                 if (result.Succeeded)

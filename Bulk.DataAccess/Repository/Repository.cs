@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Bulk.DataAccess.Data;
 using Bulk.DataAccess.Repository.IRepository;
 using Microsoft.EntityFrameworkCore;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Bulk.DataAccess.Repository
 {
@@ -24,9 +25,17 @@ namespace Bulk.DataAccess.Repository
             dbset.Add(entity);
         }
 
-        public T Get(Expression<Func<T, bool>> Filter, string? includeProperties = null )
+        public T Get(Expression<Func<T, bool>> Filter, string? includeProperties = null , bool tracked = false  )
         {
-            IQueryable<T> query = dbset;
+            IQueryable<T> query;
+            if (tracked)
+            {
+              query = dbset;
+            }
+            else
+            {
+                 query = dbset.AsNoTracking();
+            }
             query = query.Where(Filter);
             if (!string.IsNullOrEmpty(includeProperties))
             {
@@ -39,9 +48,14 @@ namespace Bulk.DataAccess.Repository
             return query.FirstOrDefault();
         }
 
-        public IEnumerable<T> GetAll(string? includeProperties = null)
+        public IEnumerable<T> GetAll(Expression<Func<T, bool>>? Filter,  string? includeProperties = null)
         {
             IQueryable<T> query = dbset;
+            if (Filter != null)
+            {
+                query = query.Where(Filter);
+            }
+
             if (!string.IsNullOrEmpty(includeProperties))
             {
                 foreach(var includeProperty in  includeProperties
