@@ -9,20 +9,22 @@ using System.Threading.Tasks;
 
 namespace Bulky.Models
 {
-    public class ShoppingCart
+    public class OrderDetail
     {
         public int Id { get; set; }
+
+        public int OrderHeaderId { get; set; }
+        [ValidateNever]
+        [ForeignKey("OrderHeaderId")] 
+        public OrderHeader OrderHeader { get; set; }
+
+        [Required]
         public int ProductId { get; set; }
         [ValidateNever]
         [ForeignKey("ProductId")]
         public Product Product { get; set; }
-        [Range(1,1000,ErrorMessage ="Please enter value between 1 and 1000")]
+
         public int Count { get; set; }
-        public string ApplicationUserId { get; set; }
-        [ValidateNever]
-        [ForeignKey("ApplicationUserId")]
-        public ApplicationUser ApplicationUser { get; set; }
-        [NotMapped]
         public double Price { get; set; }
     }
 }

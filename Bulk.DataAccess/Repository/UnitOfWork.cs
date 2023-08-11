@@ -12,6 +12,8 @@ namespace Bulk.DataAccess.Repository
     {
         private readonly AppDbcontext _db;
         public ICategoryRepository Category { get;private set; }   
+        public IOrderHeaderRepository OrderHeader { get;private set; }   
+        public IOrderDetailRepository OrderDetail { get;private set; }   
         public IProductRepository Product { get;private set; }   
         public ICompanyRepository Company { get;private set; }   
         public IShoppingCartRepository ShoppingCart { get;private set; }   
@@ -24,6 +26,8 @@ namespace Bulk.DataAccess.Repository
             Company = new CompanyRepository(_db);
             ShoppingCart = new ShoppingCartRepository(_db); 
             ApplicationUser = new ApplicationUserRepository(_db);   
+            OrderDetail = new OrderDetailRepository(_db);   
+            OrderHeader = new OrderHeaderRepository(_db);   
         }
        // public ICategoryRepository CategoryRepository { get;private set; }
 
