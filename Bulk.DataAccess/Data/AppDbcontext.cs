@@ -27,7 +27,7 @@ namespace Bulk.DataAccess.Data
                 b.HasData(new
                 {
                     Id = 2,
-                    Name = "sara",
+                    Name = "noor",
                     DisplayOrder = 2,
 
                 });
