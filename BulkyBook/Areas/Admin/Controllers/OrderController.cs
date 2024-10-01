@@ -1,6 +1,7 @@
 ﻿using Bulk.DataAccess.Repository;
 using Bulk.DataAccess.Repository.IRepository;
 using Bulky.Models;
+using Bulky.Models.ViewModels;
 using Bulky.Utility;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -18,7 +19,18 @@ namespace BulkyBook.Areas.Admin.Controllers
         }
         public IActionResult Index()
         {
+          
             return View();
+        }
+
+        public IActionResult Details(int orderId)
+        {
+            OrderVM orderVM = new()
+            {
+                OrderHeader = _unitOfWork.OrderHeader.Get(e => e.Id == orderId, includeProperties: "ApplicationUser"),
+                OrderDetail = _unitOfWork.OrderDetail.GetAll(e => e.OrderHeaderId == orderId, includeProperties:"Product"),
+            };
+            return View(orderVM);
         }
         #region call Api
         [HttpGet]
