@@ -1,8 +1,10 @@
 ﻿using Bulk.DataAccess.Repository;
 using Bulk.DataAccess.Repository.IRepository;
 using Bulky.Models;
+using Bulky.Utility;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 
 namespace BulkyBook.Areas.Admin.Controllers
 {
@@ -20,9 +22,28 @@ namespace BulkyBook.Areas.Admin.Controllers
         }
         #region call Api
         [HttpGet]
-        public IActionResult GetAll()
+        public IActionResult GetAll(string status)
         {
-            List<OrderHeader> objOrderHeaders = _unitOfWork.OrderHeader.GetAll(includeProperties: "ApplicationUser").ToList();
+            IEnumerable<OrderHeader> objOrderHeaders = _unitOfWork.OrderHeader.GetAll(includeProperties: "ApplicationUser").ToList();
+            switch (status)
+            {
+                case "pending":
+                    objOrderHeaders = objOrderHeaders.Where(e=>e.PaymentStatus == SD.PaymentStatusPending); 
+                    break;
+                case "inprocess":
+                    objOrderHeaders = objOrderHeaders.Where(e => e.OrderStatus == SD.StatusInProgress);
+                    break;
+                case "completed":
+                    objOrderHeaders = objOrderHeaders.Where(e => e.OrderStatus == SD.StatusShipping);
+                    break;
+                case "approved":
+                    objOrderHeaders = objOrderHeaders.Where(e => e.OrderStatus == SD.StatusApproved);
+                    break;
+                default:
+                    break;
+            }
+
+
             return Json(new { data = objOrderHeaders });
         }
         #endregion
