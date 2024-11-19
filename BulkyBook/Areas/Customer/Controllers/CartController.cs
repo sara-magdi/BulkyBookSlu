@@ -159,6 +159,8 @@ namespace BulkyBook.Areas.Customer.Controllers
             OrderHeader orderHeader = _unitOfWork.OrderHeader.Get(e => e.Id == id, includeProperties: "ApplicationUser");
             if(orderHeader.PaymentStatus != SD.PaymentStatusDelayedPayment)
             {
+                //this order is by customer
+
                 var service = new SessionService();
                 Session session = service.Get(orderHeader.SessionId);
 
