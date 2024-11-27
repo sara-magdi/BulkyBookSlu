@@ -119,13 +119,13 @@ namespace BulkyBook.Areas.Customer.Controllers
                 var Domain = "https://localhost:7104/";
                 var options = new SessionCreateOptions
                 {
-                    SuccessUrl = Domain+ $"Customer/Cart/OrderConfirmation?id={ShoppingCartVM.OrderHeader.Id}",
-                    CancelUrl = Domain +$"Customer/Cart/Index",
+                    SuccessUrl = Domain + $"Customer/Cart/OrderConfirmation?id={ShoppingCartVM.OrderHeader.Id}",
+                    CancelUrl = Domain + $"Customer/Cart/Index",
                     LineItems = new List<SessionLineItemOptions>(),
                     Mode = "payment",
                 };
 
-                foreach(var item in ShoppingCartVM.ShoppingCartList)
+                foreach (var item in ShoppingCartVM.ShoppingCartList)
                 {
                     var SessionLineItem = new SessionLineItemOptions
                     {
@@ -140,12 +140,12 @@ namespace BulkyBook.Areas.Customer.Controllers
                         },
                         Quantity = item.Count
                     };
-                    options.LineItems.Add(SessionLineItem); 
+                    options.LineItems.Add(SessionLineItem);
                 }
 
                 var service = new SessionService();
-                 Session session =  service.Create(options);
-                _unitOfWork.OrderHeader.UpdateStripePaymentID(ShoppingCartVM.OrderHeader.Id,session.Id,session.PaymentIntentId);
+                Session session = service.Create(options);
+                _unitOfWork.OrderHeader.UpdateStripePaymentID(ShoppingCartVM.OrderHeader.Id, session.Id, session.PaymentIntentId);
                 _unitOfWork.Save();
                 Response.Headers.Add("Location", session.Url);
                 return new StatusCodeResult(303);
@@ -157,7 +157,7 @@ namespace BulkyBook.Areas.Customer.Controllers
         public IActionResult OrderConfirmation(int id)
         {
             OrderHeader orderHeader = _unitOfWork.OrderHeader.Get(e => e.Id == id, includeProperties: "ApplicationUser");
-            if(orderHeader.PaymentStatus != SD.PaymentStatusDelayedPayment)
+            if (orderHeader.PaymentStatus != SD.PaymentStatusDelayedPayment)
             {
                 //this order is by customer
 
@@ -170,12 +170,13 @@ namespace BulkyBook.Areas.Customer.Controllers
                     _unitOfWork.OrderHeader.UpdateSatuts(id, SD.StatusApproved, SD.PaymentStatusApproved);
                     _unitOfWork.Save();
                 }
-
+                HttpContext.Session.Clear();
+            }
                 List<ShoppingCart> shoppingCarts = _unitOfWork.ShoppingCart
                     .GetAll(e => e.ApplicationUserId == orderHeader.ApplicationUserId).ToList();
                 _unitOfWork.ShoppingCart.RemoveRange(shoppingCarts);
                 _unitOfWork.Save();
-            }
+            
             return View(id);
         }
 
@@ -190,9 +191,11 @@ namespace BulkyBook.Areas.Customer.Controllers
 
         public IActionResult Minus(int CartId)
         {
-            var cartFromDB = _unitOfWork.ShoppingCart.Get(e => e.Id == CartId);
+            var cartFromDB = _unitOfWork.ShoppingCart.Get(e => e.Id == CartId, tracked: true);
             if (cartFromDB.Count <= 1)
             {
+                HttpContext.Session.SetInt32(SD.SessionCart,
+              _unitOfWork.ShoppingCart.GetAll(e => e.ApplicationUserId == cartFromDB.ApplicationUserId).Count() - 1);
                 _unitOfWork.ShoppingCart.Remove(cartFromDB);
             }
             else
@@ -206,9 +209,12 @@ namespace BulkyBook.Areas.Customer.Controllers
 
         public IActionResult Remove(int CartId)
         {
-            var cartFromDB = _unitOfWork.ShoppingCart.Get(e => e.Id == CartId);
+            var cartFromDB = _unitOfWork.ShoppingCart.Get(e => e.Id == CartId,tracked:true);
+            HttpContext.Session.SetInt32(SD.SessionCart,
+                _unitOfWork.ShoppingCart.GetAll(e => e.ApplicationUserId == cartFromDB.ApplicationUserId).Count() - 1);
             _unitOfWork.ShoppingCart.Remove(cartFromDB);
             _unitOfWork.Save();
+
             return RedirectToAction(nameof(Index));
         }
 
