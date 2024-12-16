@@ -88,7 +88,7 @@ namespace BulkyBook.Areas.Admin.Controllers
             orderHeader.ShippingDate = DateTime.Now;
             if (orderHeader.PaymentStatus == SD.PaymentStatusDelayedPayment)
             {
-                orderHeader.PaymentDeuDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(30));
+                orderHeader.PaymentDeuDate = DateTime.Now.AddDays(30);
             }
             _unitOfWork.OrderHeader.Update(orderHeader);
             _unitOfWork.Save();
