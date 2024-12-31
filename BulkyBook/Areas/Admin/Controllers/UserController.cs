@@ -57,7 +57,7 @@ namespace BulkyBook.Areas.Admin.Controllers
             var obj = _db.ApplicationUsers.FirstOrDefault(e=>e.Id == id);  
             if (obj == null)
             {
-                return Json(new { Success = true, message = "Erorr While Locking / Unlocking" });
+                return Json(new { success = true, message = "Erorr While Locking / Unlocking" });
             }
             if(obj.LockoutEnd != null && obj.LockoutEnd > DateTime.Now)
             {
@@ -69,7 +69,7 @@ namespace BulkyBook.Areas.Admin.Controllers
                 obj.LockoutEnd = DateTime.Now.AddYears(1000);
             }
             _db.SaveChanges();
-            return Json(new { Success = true, message = "Operation Successfully" });
+            return Json(new { success = true, message = "Operation Successfully" });
         }
         #endregion
     }
