@@ -52,16 +52,16 @@ namespace BulkyBook.Areas.Admin.Controllers
             else
             {
                 //Update
-                productViewModel.Product = _unitOfWork.Product.Get(w => w.Id == id);
+                productViewModel.Product = _unitOfWork.Product.Get(w => w.Id == id ,includeProperties:"ProductImages");
                 return View(productViewModel);
             }
         }
         [HttpPost]
-        public IActionResult Upsert(ProductViewModel obj, IFormFile? file)
+        public IActionResult Upsert(ProductViewModel obj, List<IFormFile> files)
         {
             if (ModelState.IsValid)
             {
-
+                // Add or update the product
                 if (obj.Product.Id == 0)
                 {
                     _unitOfWork.Product.Add(obj.Product);
@@ -70,110 +70,151 @@ namespace BulkyBook.Areas.Admin.Controllers
                 {
                     _unitOfWork.Product.Update(obj.Product);
                 }
-            
 
-            _unitOfWork.Save();
+                _unitOfWork.Save();
 
-            string wwwRootPath = _webHostEnvironment.WebRootPath;
-            if (file != null)
-            {
-                string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-                string ProductPath = Path.Combine(wwwRootPath, @"Images\Product");
-
-                if (!string.IsNullOrEmpty(obj.Product.ImageUrl))
+                // Save images if uploaded
+                string wwwRootPath = _webHostEnvironment.WebRootPath;
+                if (files != null && files.Count > 0)
                 {
+                    string productPath = Path.Combine("Images", "Products", "Product-" + obj.Product.Id);
+                    string finalPath = Path.Combine(wwwRootPath, productPath);
 
-                    var OldImagePath = Path.Combine(wwwRootPath, obj.Product.ImageUrl.TrimStart('\\'));
-                    if (System.IO.File.Exists(OldImagePath))
+                    // Ensure the directory exists
+                    if (!Directory.Exists(finalPath))
+                        Directory.CreateDirectory(finalPath);
+
+                    foreach (IFormFile file in files)
                     {
-                        System.IO.File.Delete(OldImagePath);
+                        string fileName = Guid.NewGuid().ToString() + ".jpg";
+                       // string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                        string filePath = Path.Combine(finalPath, fileName);
+
+                        // Save the file
+                        using (var fileStream = new FileStream(filePath, FileMode.Create))
+                        {
+                            file.CopyTo(fileStream);
+                        }
+
+                        // Generate the correct ImageUrl for the web
+                        string imageUrl = "/" + Path.Combine(productPath, fileName).Replace("\\", "/");
+
+                        ProductImage productImage = new()
+                        {
+                            ImageUrl = imageUrl,
+                            ProductId = obj.Product.Id,
+                        };
+
+                        if (obj.Product.ProductImages == null)
+                            obj.Product.ProductImages = new List<ProductImage>();
+
+                        obj.Product.ProductImages.Add(productImage);
+                    }
+
+                    _unitOfWork.Product.Update(obj.Product);
+                    _unitOfWork.Save();
+                }
+
+                TempData["success"] = "Product Created Successfully";
+                return RedirectToAction("Index");
+            }
+            else
+            {
+                obj.CategoryList = _unitOfWork.Category.GetAll().Select(u => new SelectListItem
+                {
+                    Text = u.Name,
+                    Value = u.Id.ToString()
+                });
+
+                return View(obj);
+            }
+        }
+
+        public IActionResult DeleteImage(int imageId)
+        {
+            var imageToBeDeleted = _unitOfWork.ProductImage.Get(u => u.Id == imageId);
+            int productId = imageToBeDeleted.ProductId;
+            if (imageToBeDeleted != null)
+            {
+                if (!string.IsNullOrEmpty(imageToBeDeleted.ImageUrl))
+                {
+                    var oldImagePath =
+                                   Path.Combine(_webHostEnvironment.WebRootPath,
+                                   imageToBeDeleted.ImageUrl.TrimStart('\\'));
+
+                    if (System.IO.File.Exists(oldImagePath))
+                    {
+                        System.IO.File.Delete(oldImagePath);
                     }
                 }
-                using (var fileStream = new FileStream(Path.Combine(ProductPath, fileName), FileMode.Create))
-                {
-                    file.CopyTo(fileStream);
-                }
-                obj.Product.ImageUrl = @"\Images\Product\" + fileName;
 
+                _unitOfWork.ProductImage.Remove(imageToBeDeleted);
+                _unitOfWork.Save();
 
-
-
-                //if (obj.Product.Id == 0)
-                //{
-                //    _unitOfWork.Product.Add(obj.Product);
-                //}
-                //else
-                //{
-                //    _unitOfWork.Product.Update(obj.Product);
-                //}
+                TempData["success"] = "Deleted successfully";
             }
 
+            return RedirectToAction(nameof(Upsert), new { id = productId });
+        }
+
+
+        //[HttpGet]
+        //public IActionResult Delete(int? id)
+        //{
+        //    if (id == null || id == 0)
+        //    {
+        //        return NotFound();
+        //    }
+        //    Product? product = _unitOfWork.Product.Get(e => e.Id == id);
+        //    if (product == null)
+        //    {
+        //        return NotFound();
+        //    }
+        //    return View(product);
+        //}
+
+        //[HttpPost, ActionName("Delete")]
+        //public IActionResult DeleteConfirm(int? id)
+        //{
+        //    Product product = _unitOfWork.Product.Get(e => e.Id == id);
+        //    if (product == null)
+        //    {
+        //        return NotFound();
+        //    }
+        //    _unitOfWork.Product.Remove(product);
+        //    _unitOfWork.Save();
+
+        //    TempData["success"] = "Product Delete Successfully";
+
+        //    return RedirectToAction("Index");
+        //}
+
+        #region API Call
+        [HttpGet]
+        public IActionResult GetAll()
+        {
+            List<Product> obj = _unitOfWork.Product.GetAll(includeProperties: "Category").ToList();
+            return Json(new { data = obj });
+        }
+
+        [HttpDelete]
+        public IActionResult Delete(int? id)
+        {
+            var objectToDelete = _unitOfWork.Product.Get(e => e.Id == id);
+            if (objectToDelete == null)
+            {
+                return Json(new { Success = false, message = "Error while Deleting" });
+
+            }
+            //var OldImagePath = Path.Combine(_webHostEnvironment.WebRootPath, objectToDelete.ImageUrl.TrimStart('\\'));
+            //if (System.IO.File.Exists(OldImagePath))
+            //{
+            //    System.IO.File.Delete(OldImagePath);
+            //}
+            _unitOfWork.Product.Remove(objectToDelete);
             _unitOfWork.Save();
-
-            TempData["success"] = "Product Created Successfully";
-            return RedirectToAction("Index");
+            return Json(new { Success = true, message = "Delete Successfully" });
         }
-            return View();
+        #endregion
     }
-
-
-    //[HttpGet]
-    //public IActionResult Delete(int? id)
-    //{
-    //    if (id == null || id == 0)
-    //    {
-    //        return NotFound();
-    //    }
-    //    Product? product = _unitOfWork.Product.Get(e => e.Id == id);
-    //    if (product == null)
-    //    {
-    //        return NotFound();
-    //    }
-    //    return View(product);
-    //}
-
-    //[HttpPost, ActionName("Delete")]
-    //public IActionResult DeleteConfirm(int? id)
-    //{
-    //    Product product = _unitOfWork.Product.Get(e => e.Id == id);
-    //    if (product == null)
-    //    {
-    //        return NotFound();
-    //    }
-    //    _unitOfWork.Product.Remove(product);
-    //    _unitOfWork.Save();
-
-    //    TempData["success"] = "Product Delete Successfully";
-
-    //    return RedirectToAction("Index");
-    //}
-
-    #region API Call
-    [HttpGet]
-    public IActionResult GetAll()
-    {
-        List<Product> obj = _unitOfWork.Product.GetAll(includeProperties: "Category").ToList();
-        return Json(new { data = obj });
-    }
-
-    [HttpDelete]
-    public IActionResult Delete(int? id)
-    {
-        var objectToDelete = _unitOfWork.Product.Get(e => e.Id == id);
-        if (objectToDelete == null)
-        {
-            return Json(new { Success = false, message = "Error while Deleting" });
-
-        }
-        var OldImagePath = Path.Combine(_webHostEnvironment.WebRootPath, objectToDelete.ImageUrl.TrimStart('\\'));
-        if (System.IO.File.Exists(OldImagePath))
-        {
-            System.IO.File.Delete(OldImagePath);
-        }
-        _unitOfWork.Product.Remove(objectToDelete);
-        _unitOfWork.Save();
-        return Json(new { Success = true, message = "Delete Successfully" });
-    }
-    #endregion
-}
 }

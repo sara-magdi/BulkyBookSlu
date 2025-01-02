@@ -9,6 +9,7 @@ namespace Bulk.DataAccess.Repository.IRepository
     public interface IUnitOfWork
     {
         ICategoryRepository Category { get; }
+        IProductImageRepository ProductImage { get; }
         IOrderDetailRepository OrderDetail { get; }
         IOrderHeaderRepository OrderHeader { get; }
         IProductRepository Product { get; }

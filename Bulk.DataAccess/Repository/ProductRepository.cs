@@ -33,12 +33,13 @@ namespace Bulk.DataAccess.Repository
                 objForm.Price100 = product.Price100;  
                 objForm.CategoryId = product.CategoryId;
                 objForm.ISBN = product.ISBN;
-                objForm.ImageUrl = product.ImageUrl = product.ImageUrl ?? "\\Images\\Product\\ec28c523-196e-4cca-ab39-56f140f1eb00.jfif";
-                if (product.ImageUrl != null)
-                { 
-                    objForm.ImageUrl = product.ImageUrl;
-                    _db.SaveChanges();
-                }
+                objForm.ProductImages = product.ProductImages;
+                //objForm.ImageUrl = product.ImageUrl = product.ImageUrl ?? "\\Images\\Product\\ec28c523-196e-4cca-ab39-56f140f1eb00.jfif";
+                //if (product.ImageUrl != null)
+                //{ 
+                //    objForm.ImageUrl = product.ImageUrl;
+                //    _db.SaveChanges();
+                //}
             }
         }
 

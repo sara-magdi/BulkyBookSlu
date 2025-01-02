@@ -1,5 +1,6 @@
 ﻿using Bulk.DataAccess.Data;
 using Bulk.DataAccess.Repository.IRepository;
+using Bulky.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,7 @@ namespace Bulk.DataAccess.Repository
     {
         private readonly AppDbcontext _db;
         public ICategoryRepository Category { get;private set; }   
+        public IProductImageRepository ProductImage { get;private set; }   
         public IOrderHeaderRepository OrderHeader { get;private set; }   
         public IOrderDetailRepository OrderDetail { get;private set; }   
         public IProductRepository Product { get;private set; }   
@@ -21,7 +23,8 @@ namespace Bulk.DataAccess.Repository
         public UnitOfWork(AppDbcontext db)
         {
             _db = db;
-            Category = new CategoryRepository(_db);    
+            Category = new CategoryRepository(_db);
+            ProductImage = new ProductImageRepository(_db);
             Product = new ProductRepository(_db);    
             Company = new CompanyRepository(_db);
             ShoppingCart = new ShoppingCartRepository(_db); 

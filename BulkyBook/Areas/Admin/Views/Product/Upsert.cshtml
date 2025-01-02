@@ -5,7 +5,7 @@
     <div class="card-header bg-secondary bg-gradient mt-0 py-3">
         <div class="row">
             <div class="col-12 text-center">
-                <h2 class="p-0 text-white py-2">@(Model.Product.Id!=0? "Update" : "Create") Product</h2>
+                <h2 class="p-0 text-white py-2">@(Model.Product.Id != 0 ? "Update" : "Create") Product</h2>
 
             </div>
         </div>
@@ -16,7 +16,7 @@
                 <div class="col-10 pt-2">
                     <div class="border p-3 mt-4">
                         <input asp-for="Product.Id" hidden />
-                        <input asp-for="Product.ImageUrl" hidden />
+                        @*                         <input asp-for="Product.ImageUrl" hidden /> *@
 
                         <div asp-validation-summary="ModelOnly"></div>
                         <div class="form-floating  py-2 col-12 ">
@@ -67,9 +67,9 @@
                         </div>
 
                         <div class="form-floating  py-2 col-12">
-                            <input type="file" name="file" class="form-control border-0 shadow" />
-                            <label class="ms-2" asp-for="Product.ImageUrl"></label>
-                            <span asp-validation-for="Product.ImageUrl" class="text-danger"></span>
+                            <input type="file" name="files" class="form-control border-0 shadow" multiple />
+                            <label class="ms-2" asp-for="Product.ProductImages"></label>
+                            <span asp-validation-for="Product.ProductImages" class="text-danger"></span>
                         </div>
 
                         @* <div class="form-floating  py-2 col-12">
@@ -105,25 +105,38 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="col-2 pt-2">
-                    <img  src="@Model.Product.ImageUrl" width="100%"
-                    style="border-radius:5px; border:1px solid #bbb9b9"/>
+                    @if (Model.Product.ProductImages != null)
+                    {
+                        foreach (var image in Model.Product.ProductImages)
+                        {
+                            <div class="border p-1 m-2 text-center">
+                                <img src="@image.ImageUrl" width="100%"
+                                     style="border-radius:5px; border:1px solid #bbb9b9" />
+                                <a asp-action="DeleteImage" class="btn btn-danger" asp-route-imageId="@image.Id">
+                                    <i class="bi bi-trash-fill"></i> Delete
+                                </a>
+                            </div>
+                        }
+                    }
+
                 </div>
             </div>
-     
+
         </form>
     </div>
 </div>
 
 
 
-@section scripts{
+@section scripts {
     <script>
         tinymce.init({
             selector: 'textarea',
             plugins: 'anchor autolink charmap codesample emoticons   lists   table visualblocks wordcount checklist mediaembed casechange export formatpainter pageembed linkchecker a11ychecker tinymcespellchecker permanentpen powerpaste advtable advcode editimage tinycomments tableofcontents footnotes mergetags autocorrect typography inlinecss',
             toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough  addcomment showcomments  | align lineheight | checklist numlist bullist indent outdent |',
-        
+
         });
     </script>
     @{
