@@ -206,6 +206,20 @@ namespace BulkyBook.Areas.Admin.Controllers
                 return Json(new { Success = false, message = "Error while Deleting" });
 
             }
+            string productPath = @"images\products\product-" + id;
+            string finalPath = Path.Combine(_webHostEnvironment.WebRootPath, productPath);
+
+            if (Directory.Exists(finalPath))
+            {
+                string[] filePaths = Directory.GetFiles(finalPath);
+                foreach (string filePath in filePaths)
+                {
+                    System.IO.File.Delete(filePath);
+                }
+
+                Directory.Delete(finalPath);
+            }
+
             //var OldImagePath = Path.Combine(_webHostEnvironment.WebRootPath, objectToDelete.ImageUrl.TrimStart('\\'));
             //if (System.IO.File.Exists(OldImagePath))
             //{

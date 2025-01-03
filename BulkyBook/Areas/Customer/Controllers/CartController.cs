@@ -27,12 +27,13 @@ namespace BulkyBook.Areas.Customer.Controllers
             {
                 ShoppingCartList = _unitOfWork.ShoppingCart.GetAll(e => e.ApplicationUserId == userId,
                 includeProperties: "Product"),
-
                 OrderHeader = new()
             };
 
+            IEnumerable<ProductImage> ProductImage = _unitOfWork.ProductImage.GetAll();
             foreach (var cart in ShoppingCartVM.ShoppingCartList)
             {
+                cart.Product.ProductImages = ProductImage.Where(e => e.ProductId == cart.Product.Id).ToList();
                 cart.Price = GetPriceBasedOnQuanity(cart);
                 ShoppingCartVM.OrderHeader.OrderTotal += (cart.Price * cart.Count);
             }
@@ -77,7 +78,7 @@ namespace BulkyBook.Areas.Customer.Controllers
 
             ShoppingCartVM.ShoppingCartList = _unitOfWork.ShoppingCart
                 .GetAll(e => e.ApplicationUserId == userId,
-                includeProperties: "Product");
+                includeProperties: "Product,ProductImages");
             ShoppingCartVM.OrderHeader.OrderDate = System.DateTime.Now;
             ShoppingCartVM.OrderHeader.ApplicationUserId = userId;
 
